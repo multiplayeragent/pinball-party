@@ -1,0 +1,33 @@
+{
+  "name": "Pinball Party",
+  "genre": "arcade",
+  "dim": "2D",
+  "mode": "Versus",
+  "players": "2–4",
+  "hook": "One pinball table, every side a goal. Flip fast.",
+  "how": "Everyone guards a side of one shared pinball table with two flippers. Bat the balls off bumpers, boost lanes and corner targets to score, and drain them past your rivals. Three balls through your gate and you're out; last flipper standing wins.",
+  "controls": "← → (or A / D) for your left and right flipper, Space for both; on touch, tap the left or right half",
+  "uses": [
+    [
+      "Live sync",
+      "Everyone sees the same balls and every flipper move."
+    ],
+    [
+      "Host-run physics",
+      "The host's browser runs the balls, bumpers and scores; your own flipper hits count the moment you see them. If the host leaves, the next player takes over."
+    ],
+    [
+      "Bots",
+      "Bots guard empty sides and flip on time (mostly)."
+    ],
+    [
+      "Leaderboard",
+      "Each player's best match score."
+    ]
+  ],
+  "ideas": [
+    "Add a spinning bumper in the middle that moves",
+    "Light all four corners to turn every ball into a fireball",
+    "Turn it into a candy table with gumball balls"
+  ]
+}
