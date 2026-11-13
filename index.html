@@ -465,6 +465,7 @@ function myTick(dt, g, now) {
       const off = Math.hypot(b.x - x, b.y - y), drift = 60 + Math.hypot(vx, vy) * 0.25;
       if (h > b.h || at !== b.at || b.gone || (h === b.h && off > drift) || (h < b.h && now - pred.mineAt > 500)) {
         if (h > b.h && off < 250) { b.ox += b.x - x; b.oy += b.y - y; } // draw the jump smoothly
+        if (h > b.h && at === b.at && o >= 0 && o !== seat) hitFx({ x, y }, { e: "flip", i: o }); // someone else's (or a bot's) flip: the same sparks the host shows
         Object.assign(b, { x, y, vx, vy, h, at, o, gone: false });
       }
       return b;
@@ -686,7 +687,9 @@ function fixColor() {
 // ── INPUT ───────────────────────────────────────────────────────────────────────────
 const touchUI = matchMedia("(pointer: coarse)").matches && !ATTRACT;
 const keys = new Set(), pointers = new Map(); // pointerId -> side (1 left, 2 right)
-const LEFT_KEYS = ["arrowleft", "a", "z", "shift"], RIGHT_KEYS = ["arrowright", "d", "m", "/"];
+const LEFT_KEYS = ["arrowleft", "a", "z", "shift"], RIGHT_KEYS = ["arrowright", "d", "m", "/", "shiftright"]; // like a real table: left Shift left, right Shift right
+/** A key's name: lowercase (Shift or Caps Lock don't turn "a" into another key); right Shift and "/" by where they are (Shift makes "/" a "?"). */
+const keyName = (e) => (e.code === "ShiftRight" ? "shiftright" : e.code === "Slash" ? "/" : e.key.toLowerCase());
 function readInput() {
   let m = 0;
   if (LEFT_KEYS.some((k) => keys.has(k)) || keys.has(" ")) m |= 1;
@@ -694,8 +697,8 @@ function readInput() {
   for (const side of pointers.values()) m |= side;
   me.mask = m;
 }
-addEventListener("keydown", (e) => { const k = e.key.toLowerCase(); if ([...LEFT_KEYS, ...RIGHT_KEYS, " "].includes(k)) e.preventDefault(); unlockAudio(); keys.add(k); readInput(); });
-addEventListener("keyup", (e) => { keys.delete(e.key.toLowerCase()); readInput(); });
+addEventListener("keydown", (e) => { const k = keyName(e); if ([...LEFT_KEYS, ...RIGHT_KEYS, " "].includes(k)) e.preventDefault(); unlockAudio(); keys.add(k); readInput(); });
+addEventListener("keyup", (e) => { keys.delete(keyName(e)); readInput(); });
 addEventListener("blur", () => { keys.clear(); pointers.clear(); readInput(); });
 cv.addEventListener("pointerdown", (e) => { e.preventDefault(); unlockAudio(); cv.setPointerCapture(e.pointerId); pointers.set(e.pointerId, e.clientX < W / 2 ? 1 : 2); readInput(); });
 for (const ev of ["pointerup", "pointercancel"]) cv.addEventListener(ev, (e) => { pointers.delete(e.pointerId); readInput(); });
