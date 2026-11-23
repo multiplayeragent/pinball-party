@@ -395,8 +395,9 @@ function hostTick(dt, now) {
     }
     const left = [0, 1, 2, 3].filter((s) => g.lives[s] > 0), peopleIn = left.some((s) => g.seats[s] !== "bot");
     if (left.length <= 1 || (!peopleIn && !ATTRACT && g.seats.some((id) => id && id !== "bot"))) { // one left (none = a draw), or only bots are
-      const win = left.length ? left.reduce((a, s) => (g.lives[s] > g.lives[a] || (g.lives[s] === g.lives[a] && g.scores[s] > g.scores[a]) ? s : a), left[0]) : -1;
-      g = writeGame({ ...g, phase: "over", win, out: [...g.out, ...left.filter((s) => s !== win)], overAt: t + CONFIG.resultsMs });
+      const scores = g.scores.map((v, i) => v + host.add[i]); host.add = [0, 0, 0, 0]; // the last points count too
+      const win = left.length ? left.reduce((a, s) => (g.lives[s] > g.lives[a] || (g.lives[s] === g.lives[a] && scores[s] > scores[a]) ? s : a), left[0]) : -1;
+      g = writeGame({ ...g, phase: "over", win, scores, out: [...g.out, ...left.filter((s) => s !== win)], overAt: t + CONFIG.resultsMs });
     }
   }
   if (now - host.lastBalls > CONFIG.ballSendMs) writeBalls(true);
@@ -412,7 +413,7 @@ function applyHit(msg, from) {
   const g = game();
   if (!g || g.phase !== "play" || msg.g !== g.id) return;
   const s = g.seats.indexOf(from), b = balls.find((q) => q.k === msg.k), x = +msg.x, y = +msg.y, vx = +msg.vx, vy = +msg.vy;
-  if (s < 0 || !b || g.lives[s] <= 0 || !isFinite(x + y + vx + vy) || Math.hypot(x - b.x, y - b.y) > 260) return;
+  if (s < 0 || !b || b.at > Date.now() || g.lives[s] <= 0 || !isFinite(x + y + vx + vy) || Math.hypot(x - b.x, y - b.y) > 260) return;
   if (toLocal(s, x, y)[1] < HA - 220) return; // a flip happens by your own gate
   const k = Math.min(1, CONFIG.maxSpeed / (Math.hypot(vx, vy) || 1));
   Object.assign(b, { x, y, vx: vx * k, vy: vy * k, o: s }); b.h++;
